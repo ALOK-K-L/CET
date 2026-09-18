@@ -1,0 +1,40 @@
+// use prisma-8
+
+model Patient {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  createdAt Timestamp(3) @default(now())
+  updatedAt Timestamp(3)
+
+  examinations Examination[]
+}
+
+model Examination {
+  id        String   @id @default(uuid())
+  patientId String
+  date      Timestamp(3) @default(now())
+  provider  String?
+  createdAt Timestamp(3) @default(now())
+  updatedAt Timestamp(3)
+
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  measurements Measurement[]
+}
+
+model Measurement {
+  id            String   @id @default(uuid())
+  examinationId String
+  toothNumber   Int      // 1-32
+  site          String   // e.g., 'MB', 'B', 'DB', 'ML', 'L', 'DL'
+  pocketDepth   Int?     // in mm
+  bleeding      Boolean  @default(false)
+  recession     Int?     // in mm
+  notes         String?
+  createdAt     Timestamp(3) @default(now())
+  updatedAt     Timestamp(3)
+
+  examination Examination @relation(fields: [examinationId], references: [id])
+
+  @@unique([examinationId, toothNumber, site])
+}

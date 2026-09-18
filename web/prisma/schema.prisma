@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String?  @unique
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  examinations Examination[]
+  records      PatientRecord[]
+}
+
+model Doctor {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PatientRecord {
+  id        String   @id @default(uuid())
+  patientId String
+  name      String
+  type      String   // 'text', 'image', 'pdf', etc.
+  content   String   // File URL or text content
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model Examination {
+  id        String   @id @default(uuid())
+  patientId String
+  date      DateTime @default(now())
+  provider  String?
+  status    String   @default("in_progress") // in_progress | completed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  measurements Measurement[]
+}
+
+model Measurement {
+  id            String   @id @default(uuid())
+  examinationId String
+  toothNumber   Int      // 1-32
+  site          String   // mesio_facial, facial, disto_facial, mesio_lingual, lingual, disto_lingual
+  pocketDepth   Int?     // in mm
+  recession     Int?     // in mm
+  bleeding      Boolean  @default(false)
+  isMissing     Boolean  @default(false)
+  isCorrection  Boolean  @default(false)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  examination Examination @relation(fields: [examinationId], references: [id], onDelete: Cascade)
+
+  @@unique([examinationId, toothNumber, site])
+}

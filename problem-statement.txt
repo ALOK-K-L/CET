@@ -1,0 +1,6 @@
+Problem 7: Real-Time Clinical Measurement
+Develop a real-time or near-real-time voice solution that enables dental professionals to capture and record clinical measurements with minimal delay.
+
+The solution should process spoken measurements such as pocket depth, bleeding, recession, and other periodontal findings, converting them into structured data and reflecting them in the application almost instantly. It should explore ways to combine speech recognition, rule-based processing, and AI while handling corrections, repeated measurements, and natural variations in speech.
+
+The goal is to reduce processing latency and manual data entry, creating a fast, seamless, hands-free clinical documentation experience.
