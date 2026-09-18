@@ -225,7 +225,7 @@ export default function ShareProfilePage() {
 
       {/* Footer */}
       <footer className="py-6 text-center text-xs font-light text-slate-400 tracking-wide">
-        Lifebeat Patient Portal • E2E Encrypted Sync
+        Lumiere Patient Portal • E2E Encrypted Sync
       </footer>
     </main>
   );

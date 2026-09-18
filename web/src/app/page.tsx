@@ -32,7 +32,7 @@ export default function LandingPage() {
               <Activity className="w-5 h-5 text-brand-cyan" />
             </div>
             <div>
-              <span className="text-xl font-extrabold tracking-tight text-brand-navy font-mono">LIFEBEAT<span className="text-brand-cyan font-sans font-medium text-xs ml-1.5 px-2 py-0.5 rounded-full bg-cyan-50 border border-cyan-200/60 uppercase tracking-widest">Dental</span></span>
+              <span className="text-xl font-extrabold tracking-tight text-brand-navy font-mono">LUMIERE</span>
             </div>
           </Link>
 
@@ -86,7 +86,7 @@ export default function LandingPage() {
                   "Listen closer. Chart faster. Act sooner."
                 </p>
                 <p className="text-base sm:text-lg text-brand-muted max-w-xl font-normal leading-relaxed">
-                  Lifebeat Dental brings sub-100ms real-time voice charting and multimodal clinical intelligence together—empowering dental teams to record periodontal metrics, review imaging, and manage patient care 100% hands-free.
+                  LUMIERE brings sub-100ms real-time voice charting and multimodal clinical intelligence together—empowering dental teams to record periodontal metrics, review imaging, and manage patient care 100% hands-free.
                 </p>
               </div>
 
@@ -150,7 +150,7 @@ export default function LandingPage() {
               INTELLIGENT DENTAL ARCHITECTURE
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-navy tracking-tight">Every Finding. One Intelligent Platform.</h2>
-            <p className="text-base text-brand-muted">Eliminate disjointed charting software. Lifebeat Dental fuses real-time voice recognition with deep clinical decision support into a singular workflow.</p>
+            <p className="text-base text-brand-muted">Eliminate disjointed charting software. LUMIERE fuses real-time voice recognition with deep clinical decision support into a singular workflow.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -289,7 +289,7 @@ export default function LandingPage() {
           <div className="col-span-2 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-brand-navy flex items-center justify-center text-brand-cyan"><Activity className="w-5 h-5" /></div>
-              <span className="text-xl font-extrabold text-brand-navy font-mono">LIFEBEAT<span className="text-brand-blue font-sans">Dental</span></span>
+              <span className="text-xl font-extrabold text-brand-navy font-mono">LUMIERE</span>
             </div>
             <p className="text-xs text-brand-muted max-w-sm leading-relaxed">The next-generation clinical intelligence and real-time voice periodontal platform built for high-performance dental teams.</p>
           </div>

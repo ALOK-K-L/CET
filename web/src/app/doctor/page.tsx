@@ -117,7 +117,7 @@ export default function DoctorDashboard() {
       
       {/* Footer */}
       <footer className="py-6 text-center text-xs font-light text-slate-400 tracking-wide mt-auto border-t border-gray-100 bg-white">
-        Lifebeat Doctor Portal • E2E Encrypted Sync
+        Lumiere Doctor Portal • E2E Encrypted Sync
       </footer>
     </main>
   );

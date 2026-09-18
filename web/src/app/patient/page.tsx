@@ -109,7 +109,7 @@ export default function PatientDashboard() {
       
       {/* Footer */}
       <footer className="py-6 text-center text-xs font-light text-slate-400 tracking-wide mt-auto border-t border-gray-100 bg-white">
-        Lifebeat Patient Portal • E2E Encrypted Sync
+        Lumiere Patient Portal • E2E Encrypted Sync
       </footer>
     </main>
   );
