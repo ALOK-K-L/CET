@@ -1,140 +1,173 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
-import ThreeJSTooth from '@/components/ThreeJSTooth';
-import AuthModal from '@/components/AuthModal';
 import { 
-  Activity, ArrowRight, Sparkles, PlayCircle, ShieldCheck, Zap, Award, 
-  Mic, BrainCircuit, CheckCircle, Layers, FileCheck2, Workflow, AudioLines, 
-  Droplet, Check, Undo2, Sliders, Wifi, LayoutDashboard, Users, ClipboardList, 
-  Bot, Calendar, BarChart3, Settings, Clock, AlertTriangle, UserCheck, 
-  History, Scan, Image as ImageIcon, CheckSquare, ShieldAlert, Send
+  Play, 
+  ArrowRight, 
+  Activity, 
+  Mic, 
+  Droplet, 
+  Check, 
+  LayoutGrid, 
+  FolderOpen, 
+  Brain, 
+  Folder,
+  CheckCircle2,
+  ArrowUp,
+  FileText,
+  Layers
 } from 'lucide-react';
+import ThreeJSTooth from '@/components/ThreeJSTooth';
 
-export default function LandingPage() {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+export default function Home() {
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("active");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll(".reveal-up, .reveal-fade").forEach(el => {
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="bg-white text-brand-slate font-sans antialiased selection:bg-brand-cyan/20 selection:text-brand-navy">
+    <div className="selection:bg-brand-ice selection:text-brand-blue relative font-sans">
       
-      {/* Auth Modal Overlay */}
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      {/* Dynamic Ambient Background */}
+      <div className="ambient-bg"></div>
 
       {/* ========================================================================= */}
       {/* NAVBAR                                                                    */}
       {/* ========================================================================= */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="#" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-blue flex items-center justify-center text-white shadow-md shadow-brand-blue/20 group-hover:scale-105 transition-transform duration-300">
-              <Activity className="w-5 h-5 text-brand-cyan" />
-            </div>
-            <div>
-              <span className="text-xl font-extrabold tracking-tight text-brand-navy font-mono">LUMIERE</span>
-            </div>
+      <header className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/60 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          
+          {/* Brand Logo */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="text-xl font-bold tracking-tight text-brand-navy">LUMIERE</span>
+            <span className="text-brand-muted/40 hidden sm:block">|</span>
+            <span className="text-[13px] font-medium text-brand-muted hidden sm:block mt-0.5">Dental Intelligence</span>
           </Link>
 
           {/* Desktop Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-brand-slate">
-            <Link href="#platform" className="hover:text-brand-blue transition-colors">Platform</Link>
-            <Link href="#voice-charting" className="hover:text-brand-blue transition-colors flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-ping"></span>
-              Voice Charting
-            </Link>
-            <Link href="#clinical-intelligence" className="hover:text-brand-blue transition-colors">Clinical Intelligence</Link>
-            <Link href="#dashboard" className="hover:text-brand-blue transition-colors">Dashboard</Link>
-            <Link href="#workflow" className="hover:text-brand-blue transition-colors">Solutions</Link>
+          <nav className="hidden md:flex items-center gap-8 text-[13px] font-semibold text-brand-muted">
+            <a href="#platform" className="hover:text-brand-navy transition-colors">Platform</a>
+            <a href="#workflow" className="hover:text-brand-navy transition-colors">Workflow</a>
+            <a href="#about" className="hover:text-brand-navy transition-colors">About</a>
           </nav>
 
-          {/* Action CTAs */}
+          {/* Action CTAs (Interesting Button Layout) */}
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsAuthModalOpen(true)} className="text-sm font-semibold text-brand-navy hover:text-brand-blue transition-colors px-3 py-2 cursor-pointer">Clinician Portal</button>
-            <button onClick={() => setIsAuthModalOpen(true)} className="relative group overflow-hidden rounded-full bg-brand-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-glow-cyan transition-all duration-300 cursor-pointer">
-              <span className="relative z-10 flex items-center gap-2">
-                Get Started
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-brand-cyan opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+            <Link href="/doctor" className="text-sm font-medium text-brand-muted hover:text-brand-navy transition-colors hidden sm:block">Clinician Portal</Link>
+            <a href="#demo" className="group relative flex items-center gap-3 rounded-full bg-brand-navy pl-4 pr-1.5 py-1.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-brand-deep hover:shadow-lg hover:-translate-y-0.5">
+              <span>View Demo</span>
+              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                <Play className="w-3.5 h-3.5 fill-white" />
+              </div>
+            </a>
           </div>
         </div>
       </header>
 
       {/* ========================================================================= */}
-      {/* HERO SECTION WITH INTERACTIVE THREE.JS 3D TOOTH                           */}
+      {/* HERO SECTION                                                              */}
       {/* ========================================================================= */}
-      <section className="relative pt-32 pb-24 md:pt-44 md:pb-36 overflow-hidden bg-gradient-to-b from-slate-50/50 via-white to-white">
-        <div className="absolute -top-40 right-1/4 w-96 h-96 bg-brand-cyan/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute top-1/3 left-10 w-80 h-80 bg-brand-blue/10 rounded-full blur-3xl pointer-events-none"></div>
-
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             
-            <div className="lg:col-span-6 space-y-8 text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50/80 border border-blue-200/60 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-brand-cyan pulse-node"></span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-brand-blue font-mono">Next-Gen Real-Time Clinical AI</span>
+            {/* Left: Copy and CTAs */}
+            <div className="space-y-8 text-left reveal-up">
+              <div className="inline-flex items-center px-4 py-2 rounded-full glass-panel shadow-sm border border-white/80">
+                <div className="w-2 h-2 rounded-full bg-brand-blue animate-pulse mr-2.5"></div>
+                <span className="text-[11px] font-mono font-bold tracking-widest text-brand-navy uppercase">Dental intelligence platform</span>
               </div>
 
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-brand-navy tracking-tight leading-[1.12]">
-                  The Future of Dental Care, <span className="shimmer-text">Powered by Intelligence.</span>
+              <div className="space-y-5">
+                <h1 className="text-5xl lg:text-6xl font-extrabold text-brand-deep tracking-tight leading-[1.05]">
+                  Dental intelligence, built around your workflow.
                 </h1>
-                <p className="text-lg font-medium text-brand-blue tracking-wide italic">
-                  "Listen closer. Chart faster. Act sooner."
-                </p>
-                <p className="text-base sm:text-lg text-brand-muted max-w-xl font-normal leading-relaxed">
-                  LUMIERE brings sub-100ms real-time voice charting and multimodal clinical intelligence together—empowering dental teams to record periodontal metrics, review imaging, and manage patient care 100% hands-free.
+                <p className="text-[16px] text-brand-muted max-w-lg font-medium leading-relaxed">
+                  Capture clinical findings, organize patient information, and support better decisions through one connected workspace.
                 </p>
               </div>
 
+              {/* Eye-defining buttons */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
-                <Link href="#voice-charting" className="px-7 py-3.5 rounded-full bg-brand-navy text-white text-sm font-semibold shadow-lg shadow-brand-navy/15 hover:shadow-glow-cyan hover:bg-brand-blue transition-all duration-300 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-brand-cyan" />
-                  Explore Platform
-                </Link>
-                <Link href="#workflow" className="px-7 py-3.5 rounded-full bg-white text-brand-navy border border-brand-border text-sm font-semibold hover:bg-slate-50 transition-all duration-300 flex items-center gap-2 shadow-sm">
-                  <PlayCircle className="w-4 h-4 text-brand-muted" />
-                  See How It Works
-                </Link>
+                <a href="#platform" className="group flex items-center gap-4 rounded-full bg-brand-blue pl-6 pr-2 py-2 text-sm font-semibold text-white shadow-lg shadow-brand-blue/20 transition-all hover:bg-blue-600 hover:-translate-y-0.5">
+                  <span>Explore Platform</span>
+                  <div className="w-8 h-8 rounded-full bg-white text-brand-blue flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </a>
+                <a href="#workflow" className="group flex items-center gap-3 rounded-full glass-panel pl-6 pr-4 py-3 text-sm font-semibold text-brand-navy shadow-sm transition-all hover:bg-white border border-white/80 hover:-translate-y-0.5">
+                  <Activity className="w-4 h-4 text-brand-muted group-hover:text-brand-blue transition-colors" />
+                  <span>View clinical workflow</span>
+                </a>
               </div>
 
-              <div className="pt-6 border-t border-slate-100 flex items-center gap-8 text-xs font-semibold text-brand-muted uppercase tracking-wider font-mono">
-                <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-brand-teal" /><span>HIPAA Compliant</span></div>
-                <div className="flex items-center gap-2"><Zap className="w-4 h-4 text-brand-blue" /><span>&lt;80ms Voice Latency</span></div>
-                <div className="flex items-center gap-2"><Award className="w-4 h-4 text-brand-cyan" /><span>99.4% Accuracy</span></div>
+              <div className="pt-6 border-t border-brand-navy/5">
+                <p className="text-[13px] font-medium text-brand-muted">
+                  Built for clearer documentation, calmer workflows and better clinical visibility.
+                </p>
               </div>
             </div>
 
-            <div className="lg:col-span-6 relative flex items-center justify-center">
-              <div className="absolute inset-0 max-w-md mx-auto aspect-square rounded-full bg-gradient-to-tr from-cyan-200/30 to-blue-300/20 blur-3xl pointer-events-none"></div>
+            {/* Right: 3D WebGL Tooth Visual Container */}
+            <div className="relative flex items-center justify-center min-h-[500px] reveal-up delay-200">
+              
+              {/* Interactive Three.js Canvas Container */}
+              <div className="relative w-full aspect-square max-w-[500px] cursor-grab active:cursor-grabbing flex items-center justify-center z-10">
+                
+                <ThreeJSTooth />
 
-              {/* THREE.JS INTEGRATION */}
-              <ThreeJSTooth />
+                {/* Premium Floating Cards (Interesting asymmetric layout) */}
+                <div className="absolute top-10 -left-4 z-20 glass-panel px-4 py-3 rounded-2xl shadow-glass border border-white/80 flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default">
+                  <div className="w-8 h-8 rounded-full bg-brand-cyan/20 flex items-center justify-center">
+                    <Mic className="w-4 h-4 text-brand-blue" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-mono font-semibold text-brand-muted uppercase tracking-wider">Status</p>
+                    <p className="text-xs font-bold text-brand-navy">Voice charting active</p>
+                  </div>
+                </div>
 
-              <div className="absolute top-4 left-2 sm:left-4 z-20 glass-card px-4 py-2.5 rounded-2xl shadow-float-pill flex items-center gap-3 border border-white/80 animate-bounce duration-[4000ms]">
-                <div className="w-8 h-8 rounded-xl bg-cyan-50 flex items-center justify-center text-brand-cyan border border-cyan-100"><Mic className="w-4 h-4 animate-pulse" /></div>
-                <div><p className="text-[11px] font-mono font-medium text-brand-muted">STATUS</p><p className="text-xs font-bold text-brand-navy">Voice Charting Active</p></div>
-              </div>
+                <div className="absolute top-32 -right-8 z-20 glass-panel px-5 py-3.5 rounded-2xl shadow-glass border border-white/80 text-left transform hover:scale-105 transition-transform cursor-default">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-amberText"></span>
+                    <span className="text-[11px] font-mono font-semibold text-brand-muted uppercase tracking-wider">Tooth 36</span>
+                  </div>
+                  <span className="text-sm font-bold text-brand-navy">Pocket depth 4 mm</span>
+                </div>
 
-              <div className="absolute top-10 right-2 sm:right-4 z-20 glass-card p-3 rounded-2xl shadow-float-pill border border-white/80 space-y-1 text-left">
-                <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-500"></span><span className="text-xs font-mono font-bold text-brand-navy">Pocket Depth: 4 mm</span></div>
-                <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span><span className="text-xs font-semibold text-rose-600">Bleeding: Detected (Tooth 36)</span></div>
-              </div>
+                <div className="absolute bottom-32 -left-8 z-20 glass-panel px-4 py-3 rounded-2xl shadow-glass border border-white/80 flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default">
+                  <div className="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center">
+                    <Droplet className="w-4 h-4 text-brand-redText fill-brand-redText" />
+                  </div>
+                  <span className="text-xs font-bold text-brand-navy">Bleeding detected</span>
+                </div>
 
-              <div className="absolute bottom-12 left-0 sm:left-2 z-20 glass-card px-4 py-3 rounded-2xl shadow-float-pill border border-white/80 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-blue flex items-center justify-center text-white shadow-sm"><BrainCircuit className="w-5 h-5 text-brand-cyan" /></div>
-                <div className="text-left"><span className="text-[10px] font-mono text-brand-cyan tracking-wider font-semibold uppercase">AI Assistant</span><p className="text-xs font-bold text-brand-navy">Subgingival Calculus Alert</p></div>
-              </div>
+                <div className="absolute bottom-10 right-0 z-20 bg-brand-navy px-4 py-3 rounded-2xl shadow-glass border border-brand-navy flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  </div>
+                  <span className="text-xs font-bold text-white">Record updated</span>
+                </div>
 
-              <div className="absolute bottom-6 right-2 sm:right-6 z-20 glass-card px-3.5 py-2 rounded-xl shadow-float-pill border border-emerald-100 flex items-center gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-500" /><span className="text-xs font-semibold text-brand-slate">Patient Record Synced</span>
-              </div>
-
-              <div className="absolute bottom-1 font-mono text-[10px] text-brand-muted/70 tracking-wider uppercase pointer-events-none">
-                • Drag to rotate 3D anatomical model •
               </div>
             </div>
 
@@ -142,157 +175,379 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SECTION 2: CLINICAL INTELLIGENCE FEATURES */}
-      <section id="clinical-intelligence" className="py-24 bg-brand-surface relative border-y border-slate-100">
+      {/* ========================================================================= */}
+      {/* PLATFORM OVERVIEW (BENTO BOX LAYOUT)                                      */}
+      {/* ========================================================================= */}
+      <section id="platform" className="py-24 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-brand-border text-xs font-mono font-semibold text-brand-blue">
-              INTELLIGENT DENTAL ARCHITECTURE
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-navy tracking-tight">Every Finding. One Intelligent Platform.</h2>
-            <p className="text-base text-brand-muted">Eliminate disjointed charting software. LUMIERE fuses real-time voice recognition with deep clinical decision support into a singular workflow.</p>
+          
+          <div className="mb-14 reveal-up">
+            <h2 className="text-3xl font-extrabold text-brand-navy tracking-tight">
+              Everything your clinical workflow needs.
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white rounded-3xl p-8 shadow-subtle-card border border-brand-border hover:shadow-glow-cyan hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+          {/* Interesting Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[280px]">
+            
+            {/* Feature 1 (Wide) */}
+            <div className="md:col-span-2 glass-panel rounded-[32px] p-8 md:p-10 shadow-card border border-white/80 flex flex-col justify-between reveal-up group hover:shadow-floating transition-all duration-500">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-brand-border text-brand-blue flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
+                <Mic className="w-6 h-6" />
+              </div>
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-cyan-50 border border-cyan-100 text-brand-cyan flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-navy transition-all duration-300"><Mic className="w-7 h-7" /></div>
-                <h3 className="text-lg font-bold text-brand-navy mb-3">Real-Time Voice Charting</h3>
-                <p className="text-sm text-brand-muted leading-relaxed">Capture periodontal measurements naturally through speech. Sub-100ms structured data reflects directly into buccal and lingual slots without latency.</p>
+                <h3 className="text-2xl font-bold text-brand-navy mb-2">Voice Periodontal Charting</h3>
+                <p className="text-[15px] text-brand-muted leading-relaxed font-medium max-w-md">
+                  Capture pocket depth, bleeding, recession and other measurements naturally through speech, instantly structuring your data.
+                </p>
               </div>
             </div>
-            <div className="bg-white rounded-3xl p-8 shadow-subtle-card border border-brand-border hover:shadow-glow-cyan hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+
+            {/* Feature 2 (Square) */}
+            <div className="md:col-span-1 glass-panel rounded-[32px] p-8 md:p-10 shadow-card border border-white/80 flex flex-col justify-between reveal-up delay-100 group hover:shadow-floating transition-all duration-500">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-brand-border text-brand-blue flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
+                <LayoutGrid className="w-6 h-6" />
+              </div>
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 text-brand-blue flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-navy transition-all duration-300"><Layers className="w-7 h-7" /></div>
-                <h3 className="text-lg font-bold text-brand-navy mb-3">Multimodal Intelligence</h3>
-                <p className="text-sm text-brand-muted leading-relaxed">Bring together historical periodontal charts, high-res CBCT scans, bitewings, prescription logs, and pathology notes into a consolidated patient twin.</p>
+                <h3 className="text-lg font-bold text-brand-navy mb-2">Smart Dental Chart</h3>
+                <p className="text-sm text-brand-muted leading-relaxed font-medium">
+                  Visualize tooth conditions, measurements, and clinical notes in one glance.
+                </p>
               </div>
             </div>
-            <div className="bg-white rounded-3xl p-8 shadow-subtle-card border border-brand-border hover:shadow-glow-cyan hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+
+            {/* Feature 3 (Square) */}
+            <div className="md:col-span-1 glass-panel rounded-[32px] p-8 md:p-10 shadow-card border border-white/80 flex flex-col justify-between reveal-up group hover:shadow-floating transition-all duration-500">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-brand-border text-brand-blue flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
+                <FolderOpen className="w-6 h-6" />
+              </div>
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-navy transition-all duration-300"><FileCheck2 className="w-7 h-7" /></div>
-                <h3 className="text-lg font-bold text-brand-navy mb-3">Smart Patient Records</h3>
-                <p className="text-sm text-brand-muted leading-relaxed">Maintain pristine dental and systemic health histories. Cross-reference drug interactions (e.g., blood thinners) during surgical charting automatically.</p>
+                <h3 className="text-lg font-bold text-brand-navy mb-2">Patient Records</h3>
+                <p className="text-sm text-brand-muted leading-relaxed font-medium">
+                  Keep history, allergies, medications, imaging, and notes linked together.
+                </p>
               </div>
             </div>
-            <div className="bg-white rounded-3xl p-8 shadow-subtle-card border border-brand-border hover:shadow-glow-cyan hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
+
+            {/* Feature 4 (Wide) */}
+            <div className="md:col-span-2 glass-panel rounded-[32px] p-8 md:p-10 shadow-card border border-white/80 flex flex-col justify-between reveal-up delay-100 group hover:shadow-floating transition-all duration-500">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-brand-border text-brand-blue flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
+                <Brain className="w-6 h-6" />
+              </div>
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100 text-brand-teal flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-navy transition-all duration-300"><Workflow className="w-7 h-7" /></div>
-                <h3 className="text-lg font-bold text-brand-navy mb-3">Practice Workflow</h3>
-                <p className="text-sm text-brand-muted leading-relaxed">Automate operatory turns, clinical note transcription, ADA procedure code billing, and recall triggers seamlessly as the clinician works.</p>
+                <h3 className="text-2xl font-bold text-brand-navy mb-2">Clinical Assistant</h3>
+                <p className="text-[15px] text-brand-muted leading-relaxed font-medium max-w-md">
+                  Support clinicians with organized information and review-ready insights directly within the patient context.
+                </p>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: REAL-TIME VOICE CHARTING */}
-      <section id="voice-charting" className="py-28 bg-white relative overflow-hidden">
+      {/* ========================================================================= */}
+      {/* CLINICAL WORKFLOW (MEGA DASHBOARD)                                        */}
+      {/* ========================================================================= */}
+      <section id="workflow" className="py-24 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-200/70 text-xs font-mono font-semibold text-cyan-800">
-              <AudioLines className="w-3.5 h-3.5 text-brand-cyan" /> SUB-100MS VOICE ENGINE
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-brand-navy tracking-tight">Your Voice. Instantly Structured.</h2>
+          
+          <div className="mb-14 reveal-up">
+            <h2 className="text-4xl font-bold text-brand-navy tracking-tight leading-tight">
+              From spoken findings<br/>to structured records.
+            </h2>
+            <p className="text-[16px] text-brand-muted max-w-xl mt-4 font-medium leading-relaxed">
+              Lumiere helps clinicians capture information naturally and review it in one highly organized, calming workspace.
+            </p>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-50 to-white rounded-3xl border border-brand-border shadow-2xl p-6 lg:p-10 relative overflow-hidden">
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200">
-              <div className="flex items-center gap-4">
-                <span className="relative flex h-3.5 w-3.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-brand-navy">Active Perio Exam Session</p>
-                  <p className="text-xs text-brand-muted font-mono">Patient: Emily Carter (ID: #PC-2489) • Provider: Dr. Sarah Jenkins</p>
+          {/* Eye-defining Premium Application Mockup */}
+          <div className="glass-panel rounded-[32px] border border-white/80 shadow-glass overflow-hidden flex flex-col md:flex-row min-h-[700px] reveal-up delay-100">
+            
+            {/* Sidebar Navigation */}
+            <div className="w-full md:w-60 bg-white/40 border-r border-white/50 p-6 flex flex-col gap-2 shrink-0">
+              <div className="flex items-center gap-3 mb-8 px-2">
+                <div className="w-8 h-8 rounded-lg bg-brand-navy flex items-center justify-center text-white">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-brand-navy">Lumiere OS</span>
+              </div>
+              
+              <span className="text-[10px] font-mono font-bold text-brand-muted uppercase tracking-wider mb-2 px-2">Workspace</span>
+              <a href="#" className="px-4 py-2.5 rounded-xl bg-white border border-white/80 text-brand-navy text-[13px] font-bold flex items-center gap-3 shadow-sm">
+                <Mic className="w-4 h-4 text-brand-blue" /> Voice Charting
+              </a>
+              <a href="#" className="px-4 py-2.5 rounded-xl text-brand-muted hover:text-brand-navy hover:bg-white/60 text-[13px] font-semibold flex items-center gap-3 transition-colors">
+                <LayoutGrid className="w-4 h-4" /> Odontogram
+              </a>
+              <a href="#" className="px-4 py-2.5 rounded-xl text-brand-muted hover:text-brand-navy hover:bg-white/60 text-[13px] font-semibold flex items-center gap-3 transition-colors">
+                <Folder className="w-4 h-4" /> Patient Records
+              </a>
+              <a href="#" className="px-4 py-2.5 rounded-xl text-brand-muted hover:text-brand-navy hover:bg-white/60 text-[13px] font-semibold flex items-center gap-3 transition-colors">
+                <Brain className="w-4 h-4" /> Clinical Assistant
+              </a>
+            </div>
+
+            {/* Main Dashboard Area */}
+            <div className="flex-1 flex flex-col bg-white/60">
+              
+              {/* Patient Context Header */}
+              <div className="px-8 py-6 border-b border-white/50 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-brand-lavender text-brand-blue flex items-center justify-center text-sm font-bold shadow-inner">
+                    JH
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-brand-navy leading-tight mb-0.5">Julian Hayes</h3>
+                    <p className="text-[11px] font-mono text-brand-muted font-medium">Male, 42y · ID: #PT-8832</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <span className="px-3 py-1.5 rounded-lg bg-brand-red text-brand-redText text-[11px] font-mono font-bold border border-brand-red">Allergy: Latex</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-white text-brand-navy text-[11px] font-mono font-bold border border-brand-border">Hypertension</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200 shadow-sm text-xs font-mono">
-                <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse"></span>
-                <span className="text-brand-navy font-semibold">Microphone Live (Edge ASR Active)</span>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8">
-              <div className="lg:col-span-5 space-y-6">
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm text-center relative overflow-hidden">
-                  <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-brand-navy to-brand-blue flex items-center justify-center text-white shadow-glow-cyan relative group cursor-pointer">
-                    <Mic className="w-8 h-8 text-brand-cyan" />
-                    <div className="absolute inset-0 rounded-full border-2 border-brand-cyan/40 pulse-node"></div>
-                  </div>
-                  <div className="mt-4">
-                    <span className="text-xs font-mono uppercase tracking-wider text-brand-muted">Spoken Audio Stream:</span>
-                    <p className="text-sm font-semibold text-brand-navy mt-1 bg-slate-50 py-2.5 px-4 rounded-xl border border-slate-100 italic">
-                      "Tooth 36, pocket depth 4 millimeters, bleeding, recession 1 millimeter."
+              {/* Interactive Content Grid */}
+              <div className="flex-1 p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-y-auto">
+                
+                {/* Voice Capture & Parsed Data (Left) */}
+                <div className="lg:col-span-5 space-y-6">
+                  
+                  {/* Clean Voice Panel */}
+                  <div className="bg-white rounded-2xl border border-brand-border p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center">
+                          <Mic className="w-4 h-4 text-brand-blue" />
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-brand-navy uppercase tracking-wider">Voice Capture</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-blue animate-pulse"></span>
+                        <span className="text-[10px] font-mono text-brand-blue font-bold">Recording</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-center gap-1.5 h-8 mb-6">
+                      <div className="w-1 bg-brand-muted/40 rounded-full wave-bar"></div>
+                      <div className="w-1 bg-brand-blue rounded-full wave-bar"></div>
+                      <div className="w-1 bg-brand-navy rounded-full wave-bar"></div>
+                      <div className="w-1 bg-brand-blue rounded-full wave-bar"></div>
+                      <div className="w-1 bg-brand-muted/40 rounded-full wave-bar"></div>
+                    </div>
+                    
+                    <p className="text-[14px] font-medium text-brand-navy italic text-center">
+                      "Tooth 36, pocket depth 4 millimeters, bleeding present, recession 1 millimeter."
                     </p>
                   </div>
+
+                  {/* Extracted Findings */}
+                  <div className="bg-white rounded-2xl border border-brand-border p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[11px] font-mono font-bold text-brand-muted uppercase tracking-wider">Extracted Findings</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center p-3 rounded-xl bg-brand-bg">
+                        <span className="text-[13px] text-brand-muted font-medium">Tooth</span>
+                        <span className="text-[13px] font-bold text-brand-navy">36</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 rounded-xl bg-brand-bg">
+                        <span className="text-[13px] text-brand-muted font-medium">Pocket depth</span>
+                        <span className="text-[13px] font-bold text-brand-navy">4 mm</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 rounded-xl bg-brand-red/50">
+                        <span className="text-[13px] text-brand-redText font-medium">Bleeding (BOP)</span>
+                        <span className="text-[11px] font-bold text-brand-redText bg-brand-red px-2 py-0.5 rounded-full border border-red-200">Present</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 rounded-xl bg-brand-bg">
+                        <span className="text-[13px] text-brand-muted font-medium">Recession</span>
+                        <span className="text-[13px] font-bold text-brand-navy">1 mm</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 flex gap-3">
+                      <button className="flex-1 py-2.5 bg-brand-navy text-white text-[13px] font-semibold rounded-xl hover:bg-brand-deep transition-colors shadow-sm">Confirm entry</button>
+                      <button className="px-4 py-2.5 border border-brand-border text-brand-navy text-[13px] font-semibold rounded-xl hover:bg-brand-bg transition-colors">Edit</button>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-brand-blue">AI Parsed Structure</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">VALIDATED 99.8%</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                      <p className="text-[11px] font-mono text-brand-muted">TARGET TOOTH</p>
-                      <p className="text-base font-bold text-brand-navy">#36 (Lower Left 1st Molar)</p>
+                {/* Dental Chart & Clinical Notes (Right) */}
+                <div className="lg:col-span-7 flex flex-col gap-6">
+                  
+                  {/* Clean Odontogram */}
+                  <div className="bg-white border border-brand-border rounded-2xl p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-6 border-b border-brand-border pb-4">
+                      <h3 className="text-[14px] font-bold text-brand-navy">Periodontal Chart</h3>
+                      <div className="flex gap-4 text-[11px] font-mono text-brand-muted font-medium">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-brand-mint"></span> Normal</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-brand-amber"></span> Review</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-brand-redText"></span> Attention</span>
+                      </div>
                     </div>
-                    <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200/60">
-                      <p className="text-[11px] font-mono text-amber-700">POCKET DEPTH</p>
-                      <p className="text-base font-bold text-amber-900">4 mm</p>
+
+                    <div className="space-y-6">
+                      {/* Upper Arch */}
+                      <div>
+                        <div className="text-[10px] font-mono text-brand-muted mb-2 uppercase tracking-wider text-center font-bold">Upper Arch</div>
+                        <div className="grid grid-cols-8 gap-2 text-center">
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">18<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 2 3</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">17<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">3 2 3</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">16<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 1 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">15<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 2 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">14<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">1 2 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">13<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 1 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">12<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 2 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">11<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 1 2</div></div>
+                        </div>
+                      </div>
+
+                      {/* Lower Arch */}
+                      <div>
+                        <div className="text-[10px] font-mono text-brand-muted mb-2 uppercase tracking-wider text-center font-bold">Lower Arch</div>
+                        <div className="grid grid-cols-8 gap-2 text-center">
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">48<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">3 2 3</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">47<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 2 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">46<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">3 2 3</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">45<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 1 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">44<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 2 2</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">43<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">1 2 1</div></div>
+                          <div className="p-2 border border-brand-border rounded-xl bg-brand-mint/50 text-[13px] font-bold text-brand-navy">42<div className="text-[10px] mt-1 text-brand-muted font-mono font-medium">2 2 2</div></div>
+                          
+                          {/* Active/Selected Tooth */}
+                          <div className="p-2 border border-brand-blue rounded-xl bg-brand-blue/5 text-[13px] font-bold text-brand-navy relative shadow-sm ring-2 ring-brand-blue/20">
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-brand-redText border-2 border-white"></span>
+                            36<div className="text-[10px] mt-1 text-brand-blue font-mono font-bold">4 3 2</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Clinical Notes & AI Triage */}
+                  <div className="bg-white rounded-2xl border border-brand-border p-6 flex-1 flex flex-col shadow-sm">
+                    <div className="flex items-center justify-between mb-4 border-b border-brand-border pb-3">
+                      <div className="flex items-center gap-2">
+                        <Brain className="w-4 h-4 text-brand-blue" />
+                        <span className="text-[13px] font-bold text-brand-navy">Clinical Assistant Insights</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-medium text-brand-muted bg-brand-bg px-2 py-1 rounded">Professional review required</span>
+                    </div>
+                    
+                    <div className="flex-1 text-[13px] text-brand-navy space-y-3">
+                      <div className="bg-brand-bg p-4 rounded-xl border border-brand-border w-fit max-w-[95%]">
+                        <p className="font-bold text-brand-navy text-[11px] mb-1.5 uppercase tracking-wide">Observation Logged</p>
+                        <p className="leading-relaxed">Pocket depth on tooth 36 increased from 2mm (last visit) to 4mm. Bleeding on probing is now present.</p>
+                      </div>
+                      <div className="bg-brand-ice/50 p-4 rounded-xl border border-brand-blue/20 w-fit max-w-[95%] ml-auto">
+                        <p className="leading-relaxed text-brand-blue">Drafting follow-up note for review. Would you like to append hygiene instructions?</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 relative">
+                      <input type="text" placeholder="Type instructions..." className="w-full text-[13px] font-medium px-4 py-3 rounded-xl border border-brand-border bg-white outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10 transition-all shadow-sm" />
+                      <button className="absolute right-2 top-2 bottom-2 w-8 bg-brand-navy text-white rounded-lg flex items-center justify-center hover:bg-brand-deep transition-colors">
+                        <ArrowUp className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
-              <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                <div>
-                  <h4 className="text-base font-bold text-brand-navy">Universal Periodontal Arch</h4>
-                  <p className="text-xs text-brand-muted mb-4">Mandibular & Maxillary Probing Depth Array</p>
-                  <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                    <div className="text-center font-mono text-[11px] text-brand-muted mb-2">ARCH VISUALIZATION</div>
-                    <div className="h-32 bg-slate-100 rounded-lg flex flex-col items-center justify-center text-slate-400 text-sm">
-                      Interactive Odontogram Embedded Here
-                      <Link href="/doctor" className="mt-2 text-brand-blue underline">Go to Charting Dashboard</Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* PRODUCT BENEFITS (COMPACT)                                                */}
+      {/* ========================================================================= */}
+      <section className="py-24 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left reveal-up">
+            
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-brand-border flex items-center justify-center text-brand-navy mx-auto md:mx-0 shadow-sm">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="text-[18px] font-bold text-brand-navy">Less manual documentation</h3>
+              <p className="text-[14px] text-brand-muted leading-relaxed font-medium">
+                Real-time voice capture transforms spoken findings directly into structured clinical data, keeping hands free and focus on the patient.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-brand-border flex items-center justify-center text-brand-navy mx-auto md:mx-0 shadow-sm">
+                <Layers className="w-5 h-5" />
+              </div>
+              <h3 className="text-[18px] font-bold text-brand-navy">More organized information</h3>
+              <p className="text-[14px] text-brand-muted leading-relaxed font-medium">
+                Designed for secure workflows. All charting, imaging, medical history, and notes live in one clean, unified workspace.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-brand-border flex items-center justify-center text-brand-navy mx-auto md:mx-0 shadow-sm">
+                <Activity className="w-5 h-5" />
+              </div>
+              <h3 className="text-[18px] font-bold text-brand-navy">Better continuity</h3>
+              <p className="text-[14px] text-brand-muted leading-relaxed font-medium">
+                Supports clinical decision-making by tracking historical changes across visits and organizing relevant context for easy review.
+              </p>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* SECTION 8: CALL TO ACTION */}
-      <section className="py-24 bg-brand-navy text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-cyan/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-blue/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="max-w-5xl mx-auto px-6 text-center relative z-10 space-y-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-mono text-brand-cyan">READY TO MODERNIZE YOUR OPERATORY?</div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-            Transform the Way Your <br className="hidden sm:inline" />
-            <span className="shimmer-text">Dental Practice Works.</span>
+      {/* ========================================================================= */}
+      {/* FINAL CTA                                                                 */}
+      {/* ========================================================================= */}
+      <section className="py-32 relative text-center border-t border-white">
+        <div className="max-w-3xl mx-auto px-6 space-y-8 reveal-up">
+          <h2 className="text-4xl lg:text-5xl font-extrabold text-brand-deep tracking-tight">
+            Bring clarity to every clinical workflow.
           </h2>
+          <p className="text-[16px] text-brand-muted font-medium max-w-xl mx-auto">
+            Explore a more organized way to capture and review dental information.
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <button onClick={() => setIsAuthModalOpen(true)} className="px-8 py-4 rounded-full bg-gradient-to-r from-brand-blue to-brand-cyan text-brand-navy font-bold text-sm hover:shadow-glow-cyan hover:scale-105 transition-all duration-300">
-              Explore the Platform
-            </button>
+            <a href="#demo" className="px-8 py-3.5 rounded-full bg-brand-navy text-white text-[14px] font-semibold hover:bg-brand-deep transition-all shadow-lg hover:-translate-y-0.5">
+              View Demo
+            </a>
+            <a href="#platform" className="px-8 py-3.5 rounded-full glass-panel text-brand-navy border border-white text-[14px] font-semibold hover:bg-white transition-all shadow-sm hover:-translate-y-0.5">
+              Explore Platform
+            </a>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-white border-t border-brand-border py-16 text-brand-slate">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-5 gap-8">
-          <div className="col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-brand-navy flex items-center justify-center text-brand-cyan"><Activity className="w-5 h-5" /></div>
-              <span className="text-xl font-extrabold text-brand-navy font-mono">LUMIERE</span>
-            </div>
-            <p className="text-xs text-brand-muted max-w-sm leading-relaxed">The next-generation clinical intelligence and real-time voice periodontal platform built for high-performance dental teams.</p>
+      {/* ========================================================================= */}
+      {/* FOOTER                                                                    */}
+      {/* ========================================================================= */}
+      <footer className="bg-white border-t border-brand-border py-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-bold text-brand-navy tracking-tight">LUMIERE</span>
+            <span className="text-brand-border">|</span>
+            <span className="text-[12px] font-medium text-brand-muted mt-0.5">Dental Intelligence</span>
           </div>
+
+          <div className="flex gap-8 text-[13px] font-semibold text-brand-muted">
+            <a href="#platform" className="hover:text-brand-navy transition-colors">Platform</a>
+            <a href="#about" className="hover:text-brand-navy transition-colors">About</a>
+            <a href="#contact" className="hover:text-brand-navy transition-colors">Contact</a>
+          </div>
+
+          <p className="text-[11px] font-mono text-brand-muted/70 font-medium">
+            &copy; 2026 Lumiere. All rights reserved.
+          </p>
+          
         </div>
       </footer>
     </div>

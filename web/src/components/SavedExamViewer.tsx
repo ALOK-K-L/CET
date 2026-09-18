@@ -133,10 +133,19 @@ export default function SavedExamViewer({
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <Odontogram
               notation="Universal"
-              readOnly={true}
+              readOnly={false}
+              singleSelect={true}
               teethConditions={teethConditions}
               layout="square"
               theme="light"
+              onChange={(selected) => {
+                if (selected && selected.length > 0) {
+                  const toothNum = Number(selected[0].notations?.universal || selected[0].id);
+                  setTimeout(() => {
+                    setSelectedTooth((prev) => prev !== toothNum ? toothNum : prev);
+                  }, 0);
+                }
+              }}
               tooltip={{
                 content: (tooth: any) => (
                   <div className="p-1 text-center font-sans">
@@ -205,8 +214,70 @@ export default function SavedExamViewer({
         </div>
       </div>
 
-      {totalTeethCharted > 0 && (
-        <div className="mt-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+      {/* ── Patient-Friendly Print Summary ─────────────────────────── */}
+      <div className="hidden print:block mt-8 text-black">
+        <h3 className="text-2xl font-bold border-b-2 border-black pb-2 mb-6">Patient Clinical Summary</h3>
+        <div className="space-y-4">
+          {totalTeethCharted === 0 && (
+            <p className="italic text-gray-500">No teeth charted.</p>
+          )}
+          {Object.entries(chart).sort((a, b) => Number(a[0]) - Number(b[0])).map(([toothNumStr, sites]) => {
+            const toothNum = Number(toothNumStr);
+            const hasData = Object.keys(sites).length > 0;
+            const isMissing = missingTeeth.has(toothNum);
+            
+            if (isMissing) {
+              return (
+                <div key={toothNumStr} className="p-3 border border-gray-300 rounded-lg">
+                  <span className="font-bold text-lg">Tooth {toothNum}:</span> <span className="text-gray-700 font-medium ml-2">Missing</span>
+                </div>
+              );
+            }
+            
+            if (!hasData) return null;
+            
+            const siteSummaries = [];
+            let mobilitySummary = null;
+            
+            for (const [site, data] of Object.entries(sites) as [string, any][]) {
+              if (data.mobility !== undefined) {
+                mobilitySummary = `Mobility Class ${data.mobility}`;
+              }
+              
+              const findings = [];
+              if (data.pocket_depth) findings.push(`${data.pocket_depth}mm pocket`);
+              if (data.bleeding) findings.push('Bleeding on probing');
+              if (data.plaque) findings.push('Plaque');
+              if (data.calculus) findings.push('Calculus (Tartar)');
+              if (data.suppuration) findings.push('Suppuration (Pus)');
+              if (data.furcation !== undefined) findings.push(`Furcation Class ${data.furcation}`);
+              if (data.recession !== undefined && data.recession !== null) findings.push(`Recession ${data.recession}mm`);
+              
+              if (findings.length > 0) {
+                const fullSiteName = site.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+                siteSummaries.push(
+                  <div key={site} className="ml-4 mt-1.5 text-sm">
+                    <span className="font-semibold underline decoration-gray-300">{fullSiteName}:</span> <span className="ml-1">{findings.join(', ')}</span>
+                  </div>
+                );
+              }
+            }
+            
+            if (siteSummaries.length === 0 && !mobilitySummary) return null;
+            
+            return (
+              <div key={toothNumStr} className="p-4 border border-gray-300 rounded-lg break-inside-avoid">
+                <div className="font-bold text-lg mb-2">Tooth {toothNum}</div>
+                {mobilitySummary && <div className="ml-4 mb-2 font-semibold text-gray-800">{mobilitySummary}</div>}
+                {siteSummaries}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Bottom: Full Clinical Data Grid ─────────────────────────── */}
+      <div className="mt-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm print:hidden">
           <h3 className="font-bold text-slate-800 text-sm mb-4">Detailed Clinical Measurements</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
@@ -220,7 +291,7 @@ export default function SavedExamViewer({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {Object.keys(chart).sort((a, b) => Number(a) - Number(b)).map(toothNumStr => {
+                {Array.from({length: 32}, (_, i) => String(i + 1)).map(toothNumStr => {
                   const toothNum = Number(toothNumStr);
                   const toothData = chart[toothNum];
                   const isMissing = missingTeeth.has(toothNum);
@@ -245,7 +316,7 @@ export default function SavedExamViewer({
                                 'text-slate-700'
                               }`}>
                                 {pd}
-                                {hasBleeding && <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />}
+                                {hasBleeding && <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block" />}
                               </span>
                             ) : (
                               <span className="text-slate-200">—</span>
@@ -255,7 +326,7 @@ export default function SavedExamViewer({
                       })}
                       <td className="p-2 text-center">
                         {isMissing ? (
-                          <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">MISSING</span>
+                          <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">MISSING</span>
                         ) : (
                           <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">PRESENT</span>
                         )}
@@ -267,7 +338,6 @@ export default function SavedExamViewer({
             </table>
           </div>
         </div>
-      )}
     </div>
   );
 }

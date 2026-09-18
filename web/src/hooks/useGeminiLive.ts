@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleGenAI, Modality, Session } from '@google/genai/web';
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -27,12 +27,19 @@ function floatTo16BitPCM(input: Float32Array): Int16Array {
 
 export type PeriodontalChartUpdate = {
   tooth_number: number;
-  site?: string;
+  site?: 'mesio_facial' | 'facial' | 'disto_facial' | 'mesio_lingual' | 'lingual' | 'disto_lingual';
   pocket_depth?: number;
   recession?: number;
   bleeding?: boolean;
   is_missing?: boolean;
   is_correction?: boolean;
+  is_clear_tooth?: boolean;
+  is_normal?: boolean;
+  plaque?: boolean;
+  calculus?: boolean;
+  suppuration?: boolean;
+  mobility?: number | null;
+  furcation?: number | null;
 };
 
 export type ChatMessage = {
@@ -51,13 +58,18 @@ const SYSTEM_INSTRUCTION = `You are a clinical periodontal scribe assistant. Lis
 - Vocabulary: Map 'mesial', 'mesio-facial', or 'mf' to mesio_facial; 'distal', 'disto-facial', or 'df' to disto_facial; 'facial', 'buccal', 'f', or 'b' to facial; 'lingual', 'palatal', 'l', or 'p' to lingual; 'ml' to mesio_lingual; 'dl' to disto_lingual.
 - Default Site: If the doctor says "Tooth 4 bleeding" without specifying a site, you MUST default to "facial" for the site parameter.
 - Homophones & Audio Nuance: You are listening to raw audio. Dentists speak quickly. If you hear 'tooth for', it means Tooth 4. 'Too' or 'to' means 2. 'Won' means 1. 'Ate' means 8. 'Tree' means 3. Always convert homophones logically to numeric tooth numbers and pocket depths.
-- Normal/Healthy: If the doctor says 'normal' or 'healthy', record pocket_depth as 2 and bleeding as false.
+- Normal/Healthy: If the doctor says 'normal' or 'healthy', record is_normal as true and bleeding as false. Do NOT record a pocket_depth.
 - Deep pocket: If the doctor says 'deep pocket' without a measurement, record pocket_depth as 5.
 - Cadence: If the doctor recites numbers sequentially (e.g., 'Tooth 3: 4, 3, 5 bleeding'), map them to mesio_facial, facial, and disto_facial.
-- Corrections: If the doctor says 'scratch that', 'change to', 'make distal 4', or 'not bleeding', trigger the tool with the new values (e.g., bleeding: false) and is_correction: true.
+- Additional Findings: Capture plaque, calculus, suppuration (pus), mobility (class 1-3), and furcation (class 1-4) when dictated (e.g., 'Tooth 4 mobility 2', 'Tooth 5 plaque', 'Tooth 6 suppuration'). Mobility applies to the whole tooth but can be recorded under the site.
+- Corrections (Same Tooth): If the doctor says 'scratch that', 'change to', 'make distal 4', or 'not bleeding', trigger the tool with the new values (e.g., bleeding: false) and is_correction: true.
+- Erase / Clear Tooth: If the doctor explicitly asks to 'erase', 'clear', 'remove', or 'delete' a tooth (e.g., 'erase the status of tooth 9'), you MUST trigger the tool for that tooth with is_clear_tooth: true.
+- Cross-Tooth Corrections & Stuttering: If the doctor rapidly changes the tooth number (e.g., 'bleeding tooth 4... no no it's 5... wait, 6') or says 'sorry I meant tooth X', you MUST immediately fire tool calls to clear any mistakenly identified teeth using is_clear_tooth: true, and fire ONE tool call for the final intended tooth with the correct measurements applied.
 - Missing: If the doctor says 'tooth 5 missing' or 'extracted', trigger the tool with is_missing: true.
-- Batch / Bulk commands: If the doctor says 'all remaining normal', 'rest are normal', 'everything else normal', 'mark remaining teeth normal', or similar batch phrases, you MUST call update_periodontal_chart ONCE FOR EACH uncharted tooth (teeth 1 through 32) with pocket_depth=2 and bleeding=false. Fire all the tool calls in rapid succession. Confirm verbally with something like "Marked all remaining teeth as normal."
-- Audio Confirmations: You MUST explicitly speak aloud a brief confirmation for EVERY measurement or correction you process (e.g., say "Tooth 4 bleeding", "Tooth 4 no bleeding", or "Corrected to 3"). Do not stay silent.`;
+- Batch / Bulk commands: If the doctor says 'all remaining normal', 'rest are normal', 'everything else normal', 'mark remaining teeth normal', or similar batch phrases, you MUST call update_periodontal_chart ONCE FOR EACH uncharted tooth (teeth 1 through 32) with is_normal=true and bleeding=false. Do NOT provide a pocket_depth. Fire all the tool calls in rapid succession. Confirm verbally with something like "Marked all remaining teeth as normal."
+- View Past Records: If the doctor says 'pull the past record', 'show previous exam', 'open history', or similar, you MUST trigger the toggle_past_record tool with show: true. Do NOT verbally claim whether records exist or not, just trigger the tool and say "Opening past record". If they say 'close record', 'hide history', or similar, trigger it with show: false.
+- Save and Share: If the doctor says 'save this and send to patient', 'save and share', 'send report to patient', or similar, you MUST trigger the save_and_share_chart tool. Confirm verbally with "Saving and sending report to patient."
+- Audio Confirmations: You MUST explicitly speak aloud a brief confirmation for EVERY measurement or correction you process (e.g., say "Tooth 4 bleeding", "Cleared Tooth 2, updated Tooth 3", or "Corrected to 3"). Do not stay silent.`;
 
 const TOOL_DECLARATION: any = {
   name: "update_periodontal_chart",
@@ -75,9 +87,37 @@ const TOOL_DECLARATION: any = {
       bleeding: { type: "BOOLEAN" as const, description: "True if Bleeding on Probing (BOP) is present." },
       recession: { type: "INTEGER" as const, description: "Gingival recession in millimeters." },
       is_missing: { type: "BOOLEAN" as const, description: "True if the tooth is declared missing or extracted." },
-      is_correction: { type: "BOOLEAN" as const, description: "True if the dentist is explicitly correcting a previous entry." }
+      is_correction: { type: "BOOLEAN" as const, description: "True if the dentist is explicitly correcting a previous entry on the same tooth." },
+      is_clear_tooth: { type: "BOOLEAN" as const, description: "True to completely wipe all data for this tooth. Use when the doctor says they meant a different tooth." },
+      is_normal: { type: "BOOLEAN" as const, description: "True if the tooth is explicitly declared normal or healthy without a specific pocket depth measurement." },
+      plaque: { type: "BOOLEAN" as const, description: "True if plaque is present." },
+      calculus: { type: "BOOLEAN" as const, description: "True if calculus (tartar) is present." },
+      suppuration: { type: "BOOLEAN" as const, description: "True if suppuration or pus is present." },
+      mobility: { type: "INTEGER" as const, description: "Tooth mobility class (1, 2, or 3)." },
+      furcation: { type: "INTEGER" as const, description: "Furcation involvement class (1, 2, 3, or 4)." }
     },
     required: ["tooth_number"]
+  }
+};
+
+const TOGGLE_RECORD_TOOL: any = {
+  name: "toggle_past_record",
+  description: "Open or close the patient's past examination records view.",
+  parameters: {
+    type: "OBJECT" as const,
+    properties: {
+      show: { type: "BOOLEAN" as const, description: "True to open/show the past record, false to close/hide it." }
+    },
+    required: ["show"]
+  }
+};
+
+const SAVE_AND_SHARE_TOOL: any = {
+  name: "save_and_share_chart",
+  description: "Trigger this when the doctor explicitly says 'save this and send to patient', 'save and share', or 'send report to patient'. This instantly saves the chart to the database and uploads the visual odontogram to the patient's portal.",
+  parameters: {
+    type: "OBJECT" as const,
+    properties: {}
   }
 };
 
@@ -85,9 +125,9 @@ const TOOL_DECLARATION: any = {
 
 const NUMBER_WORDS: Record<string, number> = {
   one: 1, won: 1, first: 1,
-  two: 2, to: 2, too: 2, second: 2,
+  two: 2, second: 2,
   three: 3, tree: 3, third: 3,
-  four: 4, for: 4, fore: 4, fourth: 4,
+  four: 4, fourth: 4,
   five: 5, fifth: 5,
   six: 6, sex: 6, sixth: 6,
   seven: 7, seventh: 7,
@@ -102,6 +142,20 @@ const NUMBER_WORDS: Record<string, number> = {
   'twenty-nine': 29, thirty: 30, 'thirty-one': 31, 'thirty-two': 32,
 };
 
+// Correction phrases that indicate the user is changing the tooth number, not dictating new data.
+// The local parser should NOT handle these — they should be deferred to Gemini.
+const CORRECTION_PHRASES = [
+  'sorry', 'meant', 'actually', 'i meant', 'i mean',
+  'no no', 'wait', 'scratch that', 'scratch', 'undo',
+  'was talking about', 'talking about', 'wrong tooth',
+  'not that', 'correction', 'correct that'
+];
+
+function containsCorrectionPhrase(text: string): boolean {
+  const lower = text.toLowerCase();
+  return CORRECTION_PHRASES.some(phrase => lower.includes(phrase));
+}
+
 function parseClinicalDictation(raw: string): PeriodontalChartUpdate | null {
   if (!raw) return null;
   let text = raw.toLowerCase()
@@ -109,6 +163,10 @@ function parseClinicalDictation(raw: string): PeriodontalChartUpdate | null {
     .replace(/\b(number|num|no\.?|chief)\b/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+  // If this contains a correction phrase, the local parser should NOT handle it.
+  // Gemini (which has memory of the session) will handle cross-tooth corrections.
+  if (containsCorrectionPhrase(text)) return null;
 
   // Pre-normalize common speech recognition mishearings BEFORE number conversion
   // Only include high-confidence substitutions that won't cause false positives
@@ -147,9 +205,9 @@ function parseClinicalDictation(raw: string): PeriodontalChartUpdate | null {
   // ── Tooth number extraction ────────────────────────────────────────
   let toothNum: number | null = null;
 
-  // Strategy 1: "tooth" keyword followed by a number
+  // Strategy: "tooth" or "number" keyword followed by a digit
   for (let i = 0; i < tokens.length; i++) {
-    if (tokens[i] === 'tooth') {
+    if (tokens[i] === 'tooth' || tokens[i] === 'number' || tokens[i] === 'teeth') {
       const next = tokens[i + 1];
       if (next) {
         const parsed = parseInt(next, 10);
@@ -161,30 +219,7 @@ function parseClinicalDictation(raw: string): PeriodontalChartUpdate | null {
     }
   }
 
-  // Strategy 2: Number followed by dental context keywords
-  const DENTAL_CONTEXT = [
-    'bleeding', 'bleed', 'blood', 'bop',
-    'pocket', 'depth', 'mm', 'millimeter',
-    'missing', 'extracted', 'extraction',
-    'facial', 'buccal', 'lingual', 'palatal', 'mesial', 'distal',
-    'mesio', 'disto', 'mesiofacial', 'distofacial',
-    'normal', 'healthy', 'deep', 'recession',
-    'tooth', // after mishearing correction, "cute" becomes "tooth"
-    'not', // "not bleeding"
-    'is', // "is bleeding", "is missing"
-    'no', // "no bleeding"
-  ];
-
-  if (!toothNum) {
-    const numberMatch = text.match(/\b([1-9]|[12][0-9]|3[0-2])\b/);
-    if (numberMatch) {
-      const hasDentalContext = DENTAL_CONTEXT.some(kw => text.includes(kw));
-      if (hasDentalContext) {
-        toothNum = parseInt(numberMatch[1], 10);
-      }
-    }
-  }
-
+  // If we can't safely extract a tooth number, let Gemini AI handle it!
   if (!toothNum) return null;
 
   // ── Site extraction ────────────────────────────────────────────────
@@ -201,6 +236,12 @@ function parseClinicalDictation(raw: string): PeriodontalChartUpdate | null {
   else if (text.includes('distal')) site = 'disto_facial';
 
   const res: PeriodontalChartUpdate = { tooth_number: toothNum, site };
+
+  // ── Clear / Erase Explicit Commands ────────────────────────────────
+  if (text.includes('clear') || text.includes('erase') || text.includes('remove') || text.includes('delete') || text.includes('reset')) {
+    res.is_clear_tooth = true;
+    return res;
+  }
 
   // ── Conditions ─────────────────────────────────────────────────────
   if (text.includes('not bleed') || text.includes('no bleed') || text.includes('without bleed') || text.includes('not bleeding') || text.includes('no bleeding')) {
@@ -239,8 +280,8 @@ function parseClinicalDictation(raw: string): PeriodontalChartUpdate | null {
   } else if (text.includes('deep pocket') || text.includes('deep')) {
     res.pocket_depth = 5;
   } else if (text.includes('normal') || text.includes('healthy')) {
-    res.pocket_depth = 2;
     res.bleeding = false;
+    res.is_normal = true;
   }
 
   // ── Recession ──────────────────────────────────────────────────────
@@ -250,19 +291,39 @@ function parseClinicalDictation(raw: string): PeriodontalChartUpdate | null {
     if (rec >= 0 && rec <= 10) res.recession = rec;
   }
 
+  if (res.pocket_depth === undefined && res.bleeding === undefined && res.is_missing === undefined && res.recession === undefined && !res.is_correction) {
+    return null;
+  }
+
   return res;
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────────
 
-export function useGeminiLive(onMeasurementReceived: (data: PeriodontalChartUpdate) => void) {
+export function useGeminiLive(
+  onMeasurementReceived: (data: PeriodontalChartUpdate) => void,
+  onTogglePastRecord: (show: boolean) => void,
+  onSaveAndShare: () => void
+) {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [chatLog, setChatLog] = useState<ChatMessage[]>([]);
 
+  // Use refs for callbacks to prevent stale closures inside WebSocket event listeners
+  const onMeasurementReceivedRef = useRef(onMeasurementReceived);
+  const onTogglePastRecordRef = useRef(onTogglePastRecord);
+  const onSaveAndShareRef = useRef(onSaveAndShare);
+
+  useEffect(() => {
+    onMeasurementReceivedRef.current = onMeasurementReceived;
+    onTogglePastRecordRef.current = onTogglePastRecord;
+    onSaveAndShareRef.current = onSaveAndShare;
+  }, [onMeasurementReceived, onTogglePastRecord, onSaveAndShare]);
+
   const isExamActiveRef = useRef(false);
   const lastProcessedKeyRef = useRef<string>('');
+  const lastChartedToothRef = useRef<number | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sessionRef = useRef<Session | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -347,13 +408,17 @@ export function useGeminiLive(onMeasurementReceived: (data: PeriodontalChartUpda
       const activeText = (finalTranscript || interimTranscript).trim();
 
       // Real-time zero-latency dictation parser
+      // NOTE: If the text contains a correction phrase (sorry, meant, actually, etc.)
+      // parseClinicalDictation returns null so we defer entirely to Gemini AI,
+      // which has session memory and can fire is_clear_tooth + new data.
       if (activeText) {
         const parsed = parseClinicalDictation(activeText);
         if (parsed) {
           const actionKey = `${parsed.tooth_number}_${parsed.site}_${parsed.bleeding}_${parsed.pocket_depth}_${parsed.is_missing}`;
           if (lastProcessedKeyRef.current !== actionKey) {
             lastProcessedKeyRef.current = actionKey;
-            onMeasurementReceived(parsed);
+            lastChartedToothRef.current = parsed.tooth_number;
+            onMeasurementReceivedRef.current(parsed);
 
             const parts: string[] = [`Tooth ${parsed.tooth_number}`];
             if (parsed.is_missing) parts.push('MISSING');
@@ -402,6 +467,8 @@ export function useGeminiLive(onMeasurementReceived: (data: PeriodontalChartUpda
     recognition.onerror = (event: any) => {
       if (event.error === 'no-speech') return;
       console.warn('[Live] SpeechRecognition error:', event.error);
+      // Force stop to guarantee onend fires and restarts it
+      try { recognition.stop(); } catch (_) {}
     };
 
     recognition.onend = () => {
@@ -450,7 +517,7 @@ export function useGeminiLive(onMeasurementReceived: (data: PeriodontalChartUpda
             parts: [{ text: SYSTEM_INSTRUCTION }]
           },
           tools: [{
-            functionDeclarations: [TOOL_DECLARATION]
+            functionDeclarations: [TOOL_DECLARATION, TOGGLE_RECORD_TOOL, SAVE_AND_SHARE_TOOL]
           }]
         },
         callbacks: {
@@ -466,33 +533,40 @@ export function useGeminiLive(onMeasurementReceived: (data: PeriodontalChartUpda
                 if (call.name === 'update_periodontal_chart') {
                   const args = call.args as PeriodontalChartUpdate;
                   console.log('[Live] Chart update:', args);
-                  onMeasurementReceived(args);
+                  onMeasurementReceivedRef.current(args);
 
-                  // Build a clean clinical transcript from the AI's interpretation
-                  const clinicalParts: string[] = [`Tooth ${args.tooth_number}`];
-                  if (args.is_missing) clinicalParts.push('is missing');
-                  else {
-                    if (args.site) clinicalParts.push(args.site.replace(/_/g, ' '));
-                    if (args.pocket_depth) clinicalParts.push(`${args.pocket_depth}mm`);
-                    if (args.bleeding === true) clinicalParts.push('bleeding');
-                    if (args.bleeding === false && args.is_correction) clinicalParts.push('not bleeding');
-                    if (args.recession) clinicalParts.push(`recession ${args.recession}mm`);
-                  }
-                  const cleanTranscript = clinicalParts.join(' ');
+                  // Handle is_clear_tooth — just show a "Cleared" message
+                  if (args.is_clear_tooth) {
+                    addMessage('ai', `🗑️ Cleared Tooth ${args.tooth_number}`);
+                  } else {
+                    // Track last charted tooth for correction context
+                    lastChartedToothRef.current = args.tooth_number;
 
-                  // Replace the most recent user message with the clean clinical version
-                  setChatLog(prev => {
-                    const updated = [...prev];
-                    for (let i = updated.length - 1; i >= 0; i--) {
-                      if (updated[i].sender === 'user') {
-                        updated[i] = { ...updated[i], text: cleanTranscript };
-                        break;
-                      }
+                    // Build a clean clinical transcript from the AI's interpretation
+                    const clinicalParts: string[] = [`Tooth ${args.tooth_number}`];
+                    if (args.is_missing) clinicalParts.push('is missing');
+                    else {
+                      if (args.site) clinicalParts.push(args.site.replace(/_/g, ' '));
+                      if (args.pocket_depth) clinicalParts.push(`${args.pocket_depth}mm`);
+                      if (args.bleeding === true) clinicalParts.push('bleeding');
+                      if (args.bleeding === false && args.is_correction) clinicalParts.push('not bleeding');
+                      if (args.recession) clinicalParts.push(`recession ${args.recession}mm`);
                     }
-                    return updated;
-                  });
+                    const cleanTranscript = clinicalParts.join(' ');
 
-                  const summaryParts: string[] = [`Tooth ${args.tooth_number}`];
+                    // Replace the most recent user message with the clean clinical version
+                    setChatLog(prev => {
+                      const updated = [...prev];
+                      for (let i = updated.length - 1; i >= 0; i--) {
+                        if (updated[i].sender === 'user') {
+                          updated[i] = { ...updated[i], text: cleanTranscript };
+                          break;
+                        }
+                      }
+                      return updated;
+                    });
+
+                    const summaryParts: string[] = [`Tooth ${args.tooth_number}`];
                   if (args.is_missing) summaryParts.push('MISSING');
                   if (args.site) summaryParts.push(args.site.replace(/_/g, ' '));
                   if (args.pocket_depth) summaryParts.push(`PD: ${args.pocket_depth}mm`);
@@ -500,8 +574,42 @@ export function useGeminiLive(onMeasurementReceived: (data: PeriodontalChartUpda
                   if (args.bleeding) summaryParts.push('BOP');
                   if (args.is_correction) summaryParts.push('(corrected)');
                   addMessage('ai', `📋 ${summaryParts.join(' · ')}`);
+                  } // end else (not is_clear_tooth)
 
-                  // Send standard function response
+                  // Send standard function response (always, for both clear and normal)
+                  try {
+                    session.sendToolResponse({
+                      functionResponses: [{
+                        id: call.id,
+                        name: call.name,
+                        response: { output: { status: "OK" } }
+                      }]
+                    });
+                  } catch (toolErr) {
+                    console.warn('[Live] Error sending tool response:', toolErr);
+                  }
+                } else if (call.name === 'toggle_past_record') {
+                  const args = call.args as { show: boolean };
+                  console.log('[Live] Toggle past record:', args);
+                  onTogglePastRecordRef.current(args.show);
+                  addMessage('ai', args.show ? '📂 Opening past record...' : '📂 Closing past record');
+                  
+                  try {
+                    session.sendToolResponse({
+                      functionResponses: [{
+                        id: call.id,
+                        name: call.name,
+                        response: { output: { status: "OK" } }
+                      }]
+                    });
+                  } catch (toolErr) {
+                    console.warn('[Live] Error sending tool response:', toolErr);
+                  }
+                } else if (call.name === 'save_and_share_chart') {
+                  console.log('[Live] Save and Share triggered');
+                  onSaveAndShareRef.current();
+                  addMessage('ai', '💾 Saving and sharing report to patient portal...');
+                  
                   try {
                     session.sendToolResponse({
                       functionResponses: [{

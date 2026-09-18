@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createPatientRecord, getPatientRecords, deletePatientRecord } from '@/app/actions';
+import Odontogram from 'react-odontogram';
 
 type RecordType = {
   id: string;
@@ -334,10 +335,28 @@ export default function UploadRecordsPage() {
                         </div>
                         <div className="flex-1 min-w-0 pr-10">
                           <h3 className="font-bold text-slate-800 truncate">{record.name}</h3>
-                          <p className="text-xs text-slate-500 mt-1">Added by Doctor on {new Date(record.createdAt).toLocaleDateString()}</p>
+                          <p className="text-xs text-slate-500 mt-1">Added by Doctor on {new Date(record.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} at {new Date(record.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
                           
                           {record.type.includes('text') && (
                             <p className="text-sm text-slate-600 mt-3 bg-white p-3 rounded-xl border border-indigo-100">{record.content}</p>
+                          )}
+                          {record.type === 'doctor_examination' && (
+                            <div className="mt-4 p-4 bg-white rounded-xl border border-slate-200">
+                              <h4 className="text-sm font-semibold text-slate-700 mb-4">Periodontal Charting Results</h4>
+                              <div className="w-full overflow-hidden flex justify-center bg-slate-50 py-4 rounded-lg border border-slate-100 mb-4">
+                                <div style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }} className="h-[280px]">
+                                  <Odontogram 
+                                    teethConditions={(() => {
+                                      try { return JSON.parse(record.content); } 
+                                      catch { return []; }
+                                    })()}
+                                  />
+                                </div>
+                              </div>
+                              <p className="text-xs text-slate-500 italic text-center">
+                                This visual chart was generated based on your clinical examination.
+                              </p>
+                            </div>
                           )}
                           {record.type.includes('image') && (
                             <div className="mt-3">
@@ -384,7 +403,7 @@ export default function UploadRecordsPage() {
                         </div>
                         <div className="flex-1 min-w-0 pr-10">
                           <h3 className="font-bold text-slate-800 truncate">{record.name}</h3>
-                          <p className="text-xs text-slate-400 mt-1">Added on {new Date(record.createdAt).toLocaleDateString()}</p>
+                          <p className="text-xs text-slate-400 mt-1">Added on {new Date(record.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} at {new Date(record.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
                           
                           {record.type.includes('text') && (
                             <p className="text-sm text-slate-600 mt-3 bg-white p-3 rounded-xl border border-slate-100">{record.content}</p>
