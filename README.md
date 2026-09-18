@@ -1,4 +1,4 @@
-# Voice@AI: Hands-Free Periodontal Charting
+# LUMIERE: Hands-Free Periodontal Charting
 
 ### **DSOLVE 2026** · DRISHTI · College of Engineering Trivandrum (CET)
 
@@ -7,7 +7,7 @@
 |                   |                                           |
 | ----------------- | ----------------------------------------- |
 | **Problem:**      | Periodontal Charting Automation           |
-| **Team Name:**    | Voice@AI                                  |
+| **Team Name:**    | NORE                                      |
 | **Team Members:** | ALOK K L · Ram Madhav M · Shreya Sunu · Divya S |
 | **Institution:**  | College of Engineering Trivandrum (CET)   |
 | **Live Demo:**    | [Demo link goes here]                     |
@@ -30,8 +30,12 @@
 
 ## Problem Statement
 
-> Periodontal charting is a critical part of dental examinations, requiring the recording of pocket depths, bleeding on probing (BOP), and recession for 32 teeth (6 sites per tooth). 
-> Currently, this requires a dentist to call out measurements while a dental assistant manually records them, leading to inefficiencies, increased staffing costs, and hygiene concerns (cross-contamination when dentists touch computers).
+> **7: Real-Time Clinical Measurement**
+> Develop a real-time or near-real-time voice solution that enables dental professionals to capture and record clinical measurements with minimal delay.
+> 
+> The solution should process spoken measurements such as pocket depth, bleeding, recession, and other periodontal findings, converting them into structured data and reflecting them in the application almost instantly. It should explore ways to combine speech recognition, rule-based processing, and AI while handling corrections, repeated measurements, and natural variations in speech.
+> 
+> The goal is to reduce processing latency and manual data entry, creating a fast, seamless, hands-free clinical documentation experience.
 
 ### Why this matters
 
@@ -41,7 +45,7 @@ By automating the scribe process, dentists can perform comprehensive periodontal
 
 ## Our Solution
 
-Voice@AI is a fully hands-free AI scribe tailored for periodontal charting. It listens to the doctor's dictation in real-time using Google's Gemini Live API, interprets complex dental terminology, and instantly updates a visual Odontogram interface. 
+LUMIERE is a fully hands-free AI scribe tailored for periodontal charting. It listens to the doctor's dictation in real-time using Google's Gemini Live API, interprets complex dental terminology, and instantly updates a visual Odontogram interface. 
 
 What makes it different:
 - **Resilient Parsing:** Handles rapid dictation, homophones (e.g., "tooth for" = Tooth 4), and speech-to-text mishearings.
