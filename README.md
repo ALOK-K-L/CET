@@ -80,11 +80,13 @@ What makes it different:
 
 ## Tech Stack
 
-- **Frontend:** Next.js 15, React 19, Tailwind CSS
-- **Backend:** Next.js App Router (Server Actions)
-- **Database:** PostgreSQL with Prisma ORM
-- **AI Integration:** Google Gemini 2.5 Flash Native Audio (Live API via WebSockets)
-- **UI Components:** Lucide React, react-odontogram
+| Layer | Technology | Why we chose it |
+| --- | --- | --- |
+| Frontend | Next.js 15, React 19, Tailwind CSS | Modern UI capabilities, server components, and rapid responsive styling |
+| Backend | Next.js App Router (Server Actions) | Seamless integration between frontend and backend with zero-API configuration |
+| Database | PostgreSQL with Prisma ORM | Strong relational data integrity for medical records with a fully type-safe ORM |
+| ML / AI | Google Gemini 2.5 Flash Native Audio | Zero-latency raw audio streaming and robust function-calling for real-time clinical charting |
+| Infra / Hosting | Localhost / Vercel | Rapid deployment and optimized runtime for Next.js applications |
 
 ---
 
