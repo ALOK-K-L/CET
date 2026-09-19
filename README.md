@@ -73,7 +73,7 @@ What makes it different:
 | Screenshot | Description |
 | --- | --- |
 | [Screenshot 1](https://drive.google.com/drive/folders/1Xkhig7zzEVw62zI1Bcc54rS3RWi5weO7) | Voice Operatory & Real-time Odontogram Charting |
-| [Screenshot 2](https://drive.google.com/drive/folders/1Xkhig7zzEVw62zI1Bcc54rS3RWi5weO7) | Patient Profile & E2E Encrypted QR Sharing |
+| [Screenshot 2](https://drive.google.com/drive/folders/1Xkhig7zzEVw62zI1Bcc54rS3RWi5weO7) | Patient Profile & Report Generation |
 | [Pitch Video](https://www.instagram.com/reel/DdcuHzKusZD/?stkn=NHBnbndyc3N4azlq) | Link to your >30s social pitch video |
 
 ---
