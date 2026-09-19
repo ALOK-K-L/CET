@@ -150,7 +150,9 @@ What makes it different:
 
 ## Team
 
-- **ALOK K L** - Team Lead
-- **Ram Madhav M**
-- **Shreya Sunu**
-- **Divya S**
+| Name | Role(s) | GitHub | Email |
+| --- | --- | --- | --- |
+| ALOK K L | Team Lead | [@ALOK-K-L](https://github.com/ALOK-K-L) | alokjee2024@gmail.com |
+| Ram Madhav M | Core Developer | [@Ram-madhav05](https://github.com/Ram-madhav05) | rammadhav3000@gmail.com |
+| Shreya Sunu | Core Developer | [@shreyasunu15](https://github.com/shreyasunu15) | shreyasunu15@gmail.com |
+| Divya S | Core Developer | [@DivyaS-100](https://github.com/DivyaS-100) | dsku1011@gmail.com |
