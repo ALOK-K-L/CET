@@ -11,7 +11,7 @@
 | **Team Members:** | ALOK K L · Ram Madhav M · Shreya Sunu · Divya S |
 | **Institution:**  | College of Engineering Trivandrum (CET)   |
 | **Live Demo:**    | [Demo link goes here]                     |
-| **Pitch Video:**  | [Social media pitch video link]           |
+| **Pitch Video:**  | [https://www.instagram.com/reel/DdcuHzKusZD/?stkn=NHBnbndyc3N4azlq](https://www.instagram.com/reel/DdcuHzKusZD/?stkn=NHBnbndyc3N4azlq) |
 
 ---
 
@@ -68,6 +68,16 @@ What makes it different:
 
 ---
 
+## Screenshots & Demo
+
+| Screenshot | Description |
+| --- | --- |
+| [Screenshot 1](https://drive.google.com/drive/folders/1Xkhig7zzEVw62zI1Bcc54rS3RWi5weO7) | Voice Operatory & Real-time Odontogram Charting |
+| [Screenshot 2](https://drive.google.com/drive/folders/1Xkhig7zzEVw62zI1Bcc54rS3RWi5weO7) | Patient Profile & E2E Encrypted QR Sharing |
+| [Pitch Video](https://www.instagram.com/reel/DdcuHzKusZD/?stkn=NHBnbndyc3N4azlq) | Link to your >30s social pitch video |
+
+---
+
 ## Tech Stack
 
 - **Frontend:** Next.js 15, React 19, Tailwind CSS
@@ -109,7 +119,7 @@ What makes it different:
    npx prisma migrate dev --name init
    ```
 
-5. Start the Development Server:
+5. Start the Development Server (starts on port 3000):
    ```bash
    npm run dev
    ```
