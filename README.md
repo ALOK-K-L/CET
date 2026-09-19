@@ -63,7 +63,7 @@ What makes it different:
 - **🦷 Interactive Odontogram:** Live visualization of bleeding, deep pockets, and missing teeth.
 - **🧠 Clinical Scribe AI:** Maps conversational speech to structured dental data using function calling.
 - **🔊 Voice Confirmations:** Audible feedback generated directly by Gemini to confirm data entry.
-- **📱 Patient Portal:** Patients can upload their records (PDFs/Images) and grant access to the doctor via QR Code.
+- **📱 Patient Portal:** Patients can upload their records (PDFs/Images) and grant access by scanning the clinic's QR Code.
 - **💾 Database Integration:** Saves charting sessions to PostgreSQL, allowing doctors to print or download reports later.
 
 ---
@@ -130,8 +130,8 @@ What makes it different:
 
 ## Usage / Demo Script
 
-1. **Patient Sharing:** Open the Patient App, upload a sample record, and generate the QR code.
-2. **Doctor Setup:** Open the Doctor App, click "Scan QR", and simulate the data transfer.
+1. **Doctor Setup:** Open the Doctor App, click "My Access QR" to generate the clinic's QR code.
+2. **Patient Sharing:** Open the Patient App, upload a sample record, and click "Share" to scan the Doctor's QR (or enter their PIN) and grant access.
 3. **Voice Charting:** Click "Start Exam" in the Charting Dashboard.
 4. **Dictate:** Say *"Tooth 4 facial bleeding"* or *"Tooth 8 deep pocket 5 millimeters"*.
 5. **Corrections:** Say *"Actually, tooth 4 is not bleeding"*.
