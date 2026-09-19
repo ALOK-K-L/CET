@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Play, 
@@ -19,8 +19,11 @@ import {
   Layers
 } from 'lucide-react';
 import ThreeJSTooth from '@/components/ThreeJSTooth';
+import AuthModal from '@/components/AuthModal';
 
 export default function Home() {
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
   useEffect(() => {
     const observerOptions = {
       root: null,
@@ -71,9 +74,20 @@ export default function Home() {
           </nav>
 
           {/* Action CTAs (Interesting Button Layout) */}
-          <div className="flex items-center gap-4">
-            <Link href="/doctor" className="text-sm font-medium text-brand-muted hover:text-brand-navy transition-colors hidden sm:block">Clinician Portal</Link>
-            <a href="#demo" className="group relative flex items-center gap-3 rounded-full bg-brand-navy pl-4 pr-1.5 py-1.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-brand-deep hover:shadow-lg hover:-translate-y-0.5">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsAuthOpen(true)}
+              className="text-sm font-semibold text-brand-muted hover:text-brand-navy transition-colors hidden sm:block px-3 py-1.5"
+            >
+              Log in
+            </button>
+            <button 
+              onClick={() => setIsAuthOpen(true)}
+              className="text-sm font-semibold bg-brand-cyan/10 text-brand-blue hover:bg-brand-cyan/20 transition-colors hidden sm:block px-4 py-1.5 rounded-full"
+            >
+              Sign up
+            </button>
+            <a href="#demo" className="group relative flex items-center gap-3 rounded-full bg-brand-navy pl-4 pr-1.5 py-1.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-brand-deep hover:shadow-lg hover:-translate-y-0.5 ml-2">
               <span>View Demo</span>
               <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
                 <Play className="w-3.5 h-3.5 fill-white" />
@@ -82,6 +96,8 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
 
       {/* ========================================================================= */}
       {/* HERO SECTION                                                              */}

@@ -10,7 +10,6 @@ import jsQR from 'jsqr';
 export default function ShareProfilePage() {
   const [patientId, setPatientId] = useState<string | null>(null);
   const [doctorPin, setDoctorPin] = useState('');
-  const [accessType, setAccessType] = useState<'ongoing' | 'snapshot'>('ongoing');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,8 +35,8 @@ export default function ShareProfilePage() {
     setIsLoading(true);
 
     try {
-      await grantDoctorAccess(patientId, doctorPin, accessType);
-      setSuccess(`Access successfully granted (${accessType === 'ongoing' ? 'Ongoing' : 'Snapshot'})!`);
+      await grantDoctorAccess(patientId, doctorPin, 'ongoing');
+      setSuccess('Access successfully granted!');
       setDoctorPin('');
       
       // Refresh history
@@ -152,51 +151,6 @@ export default function ShareProfilePage() {
                 {success}
               </div>
             )}
-
-            {/* Access Type Info Boxes (Styled like the screenshot's bottom boxes) */}
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setAccessType('ongoing')}
-                className={`p-3 rounded-xl border text-left transition-all ${
-                  accessType === 'ongoing' 
-                    ? 'border-sky-200 bg-sky-50/50' 
-                    : 'border-gray-100 bg-gray-50 hover:bg-gray-100/50'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                  <FileKey className="w-3 h-3" />
-                  Clearance
-                </div>
-                <div className={`text-sm font-medium ${accessType === 'ongoing' ? 'text-sky-700' : 'text-slate-600'}`}>
-                  Ongoing Sync
-                </div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setAccessType('snapshot')}
-                className={`p-3 rounded-xl border text-left transition-all ${
-                  accessType === 'snapshot' 
-                    ? 'border-sky-200 bg-sky-50/50' 
-                    : 'border-gray-100 bg-gray-50 hover:bg-gray-100/50'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                  <Clock className="w-3 h-3" />
-                  Time Limit
-                </div>
-                <div className={`text-sm font-medium ${accessType === 'snapshot' ? 'text-sky-700' : 'text-slate-600'}`}>
-                  Snapshot Only
-                </div>
-              </button>
-            </div>
-
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-gray-100"></div>
-              <span className="flex-shrink-0 mx-4 text-gray-300 text-[10px] font-semibold uppercase tracking-widest">Or</span>
-              <div className="flex-grow border-t border-gray-100"></div>
-            </div>
 
             <div className="flex justify-center">
               <label className="cursor-pointer flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-slate-500 px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full border border-gray-200 border-dashed">

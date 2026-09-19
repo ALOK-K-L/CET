@@ -60,7 +60,7 @@ const SYSTEM_INSTRUCTION = `You are a clinical periodontal scribe assistant. Lis
 - Homophones & Audio Nuance: You are listening to raw audio. Dentists speak quickly. If you hear 'tooth for', it means Tooth 4. 'Too' or 'to' means 2. 'Won' means 1. 'Ate' means 8. 'Tree' means 3. Always convert homophones logically to numeric tooth numbers and pocket depths.
 - Normal/Healthy: If the doctor says 'normal' or 'healthy', record is_normal as true and bleeding as false. Do NOT record a pocket_depth.
 - Deep pocket: If the doctor says 'deep pocket' without a measurement, record pocket_depth as 5.
-- Cadence: If the doctor recites numbers sequentially (e.g., 'Tooth 3: 4, 3, 5 bleeding'), map them to mesio_facial, facial, and disto_facial.
+- Cadence: If the doctor recites numbers sequentially (e.g., 'Tooth 3: 4, 3, 5 bleeding' or 'Tooth 4, 2 2 3 facial'), map them sequentially to the 3 sites of that surface. For facial: disto_facial, facial, mesio_facial (or mesio_facial, facial, disto_facial). Fire ONE tool call for EACH of the 3 measurements! For example, for '2 2 3 facial', fire three tool calls simultaneously for the three facial sites.
 - Additional Findings: Capture plaque, calculus, suppuration (pus), mobility (class 1-3), and furcation (class 1-4) when dictated (e.g., 'Tooth 4 mobility 2', 'Tooth 5 plaque', 'Tooth 6 suppuration'). Mobility applies to the whole tooth but can be recorded under the site.
 - Corrections (Same Tooth): If the doctor says 'scratch that', 'change to', 'make distal 4', or 'not bleeding', trigger the tool with the new values (e.g., bleeding: false) and is_correction: true.
 - Erase / Clear Tooth: If the doctor explicitly asks to 'erase', 'clear', 'remove', or 'delete' a tooth (e.g., 'erase the status of tooth 9'), you MUST trigger the tool for that tooth with is_clear_tooth: true.
@@ -578,7 +578,7 @@ export function useGeminiLive(
 
                   // Send standard function response (always, for both clear and normal)
                   try {
-                    session.sendToolResponse({
+                    sessionRef.current?.sendToolResponse({
                       functionResponses: [{
                         id: call.id,
                         name: call.name,
@@ -595,7 +595,7 @@ export function useGeminiLive(
                   addMessage('ai', args.show ? '📂 Opening past record...' : '📂 Closing past record');
                   
                   try {
-                    session.sendToolResponse({
+                    sessionRef.current?.sendToolResponse({
                       functionResponses: [{
                         id: call.id,
                         name: call.name,
@@ -611,7 +611,7 @@ export function useGeminiLive(
                   addMessage('ai', '💾 Saving and sharing report to patient portal...');
                   
                   try {
-                    session.sendToolResponse({
+                    sessionRef.current?.sendToolResponse({
                       functionResponses: [{
                         id: call.id,
                         name: call.name,
@@ -641,9 +641,7 @@ export function useGeminiLive(
             console.log('[Live] WebSocket closed:', ev);
             if (isExamActiveRef.current) {
               console.log('[Live] Exam still active, auto-reconnecting Gemini Live in 1s...');
-              if (sessionRef.current === session) {
-                sessionRef.current = null;
-              }
+              sessionRef.current = null;
               if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
               reconnectTimeoutRef.current = setTimeout(() => {
                 if (isExamActiveRef.current) {

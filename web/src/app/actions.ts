@@ -169,7 +169,7 @@ export async function deletePatientRecord(recordId: string) {
 
 // ── File Sharing Actions ──────────────────────────────────
 
-export async function grantDoctorAccess(patientId: string, doctorPin: string, accessType: 'ongoing' | 'snapshot' = 'ongoing') {
+export async function grantDoctorAccess(patientId: string, doctorPin: string, accessType: 'ongoing' = 'ongoing') {
   // Find doctor by checking if their ID starts with the PIN (case-insensitive not easily supported without raw query, so we enforce lowercase PIN)
   const doctors = await db.doctor.findMany();
   const doctor = doctors.find(d => d.id.startsWith(doctorPin.toLowerCase()));
@@ -182,7 +182,7 @@ export async function grantDoctorAccess(patientId: string, doctorPin: string, ac
   const existingLog = await db.patientRecord.findFirst({
     where: {
       patientId,
-      type: { in: ['access_log', 'access_log_snapshot'] },
+      type: 'access_log',
       content: doctor.id
     }
   });
@@ -195,7 +195,7 @@ export async function grantDoctorAccess(patientId: string, doctorPin: string, ac
   await db.patientRecord.create({
     data: {
       patientId: patientId,
-      type: accessType === 'snapshot' ? 'access_log_snapshot' : 'access_log',
+      type: 'access_log',
       name: `Dr. ${doctor.firstName} ${doctor.lastName}`,
       content: doctor.id,
     }
@@ -208,7 +208,7 @@ export async function getDoctorPatients(doctorId: string) {
   // Find all access logs for this doctor
   const logs = await db.patientRecord.findMany({
     where: {
-      type: { in: ['access_log', 'access_log_snapshot'] },
+      type: 'access_log',
       content: doctorId,
     },
     include: {
@@ -225,7 +225,7 @@ export async function getDoctorPatients(doctorId: string) {
       patientMap.set(log.patientId, {
         ...log.patient,
         accessedAt: log.createdAt,
-        accessType: log.type === 'access_log_snapshot' ? 'snapshot' : 'ongoing',
+        accessType: 'ongoing',
       });
     }
   }
@@ -238,7 +238,7 @@ export async function revokeDoctorAccess(patientId: string, doctorId: string) {
   const record = await db.patientRecord.findFirst({
     where: {
       patientId,
-      type: { in: ['access_log', 'access_log_snapshot'] },
+      type: 'access_log',
       content: doctorId
     }
   });
@@ -258,42 +258,14 @@ export async function getPatientAccessHistory(patientId: string) {
   const logs = await db.patientRecord.findMany({
     where: {
       patientId,
-      type: { in: ['access_log', 'access_log_snapshot'] }
+      type: 'access_log'
     },
     orderBy: { createdAt: 'desc' }
   });
   return logs;
 }
 
-export async function switchAccessType(patientId: string, doctorId: string, newType: 'ongoing' | 'snapshot') {
-  const record = await db.patientRecord.findFirst({
-    where: {
-      patientId,
-      type: { in: ['access_log', 'access_log_snapshot'] },
-      content: doctorId
-    }
-  });
 
-  if (!record) {
-    throw new Error('Access record not found.');
-  }
-
-  const newRecordType = newType === 'snapshot' ? 'access_log_snapshot' : 'access_log';
-
-  // If switching to snapshot, we update the type AND reset the createdAt to "now"
-  // so that only records uploaded BEFORE this moment are visible to the doctor
-  await db.patientRecord.update({
-    where: { id: record.id },
-    data: {
-      type: newRecordType,
-      // When switching to snapshot, freeze at current time
-      // When switching to ongoing, keep original grant time
-      ...(newType === 'snapshot' ? { createdAt: new Date() } : {})
-    }
-  });
-
-  return true;
-}
 
 // ── Auth Actions ──────────────────────────────────────────
 

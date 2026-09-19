@@ -49,10 +49,11 @@ LUMIERE is a fully hands-free AI scribe tailored for periodontal charting. It li
 
 What makes it different:
 - **Resilient Parsing:** Handles rapid dictation, homophones (e.g., "tooth for" = Tooth 4), and speech-to-text mishearings.
+- **Cadence Parsing:** Specifically trained to handle sequential rapid dictation (e.g. "Tooth 4, 2 2 3 facial") and instantly plot multiple measurements.
 - **Smart Corrections:** Doctors can verbally correct mistakes ("Tooth 4 is not bleeding"), and the system instantly updates the state.
 - **Batch Commands:** Capable of filling out remaining healthy teeth instantly.
 - **Audio Feedback:** The AI provides immediate verbal confirmation of recorded measurements.
-- **QR Code Handoff:** Patients can easily share their prior medical records via a secure QR code scan.
+- **Simplified Patient Portal:** Patients can upload their prior medical records and grant seamless sharing access to doctors instantly using an Access PIN or QR code.
 
 ---
 
